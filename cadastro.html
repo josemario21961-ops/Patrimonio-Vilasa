@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastros - Controle de Patrimônio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-blue-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Gestão de Ativos & Canteiros</h1>
+            <nav class="space-x-4">
+                <a href="index.html" class="hover:underline">Inventário</a>
+                <a href="cadastros.html" class="underline font-semibold">Cadastros</a>
+                <a href="romaneio.html" class="hover:underline">Novo Romaneio</a>
+                <a href="relatorio.html" class="hover:underline">Relatório Semanal (PDF)</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Cadastrar Novo Patrimônio / Item</h2>
+
+        <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Descrição do Item</label>
+                <input type="text" id="descricao" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: Ar Condicionado 9000 BTUS / MESA DE ESCRITÓRIO">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Modelo</label>
+                    <input type="text" id="modelo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: Split Inverter">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Fabricante</label>
+                    <input type="text" id="fabricante" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: Consul / LG">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Número de Patrimônio / TAG (Se houver)</label>
+                    <input type="text" id="patrimonio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: 11148">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Número de Série / Tag Adicional</label>
+                    <input type="text" id="serie" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: MA0141646">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Localização Inicial</label>
+                <select id="local_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                    <option value="">Carregando locais...</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Status Inicial</label>
+                <select id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                    <option value="DISPONIVEL">Disponível</option>
+                    <option value="EM_USO">Em Uso</option>
+                    <option value="MANUTENCAO">Em Manutenção</option>
+                    <option value="CALIBRACAO">Em Calibração</option>
+                </select>
+            </div>
+
+            <button onclick="salvarItem()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-bold">Salvar Patrimônio</button>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://odwctwqdwrtavsamyeam.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kd2N0d3Fkd3J0YXZzYW15ZWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODE1MzQsImV4cCI6MjEwODM1NzUzNH0.JG4-XhewNCOFWkvxGuXwa3LDJx_KLROSmUIy0-O0FLE';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function carregarLocais() {
+            const select = document.getElementById('local_id');
+            const { data, error } = await supabaseClient.from('locais').select('id, nome, tipo');
+            if (error) {
+                alert('Erro ao carregar locais: ' + error.message);
+                return;
+            }
+            select.innerHTML = '<option value="">Selecione o local...</option>';
+            data.forEach(l => {
+                select.innerHTML += `<option value="${l.id}">${l.nome} (${l.tipo})</option>`;
+            });
+        }
+
+        async function salvarItem() {
+            const descricao = document.getElementById('descricao').value;
+            const modelo = document.getElementById('modelo').value;
+            const fabricante = document.getElementById('fabricante').value;
+            const numPatrimonio = document.getElementById('patrimonio').value;
+            const serie = document.getElementById('serie').value;
+            const localId = document.getElementById('local_id').value;
+            const status = document.getElementById('status').value;
+
+            if (!descricao || !localId) {
+                alert('Preencha pelo menos a descrição e o local.');
+                return;
+            }
+
+            // 1. Criar no catálogo
+            const { data: catData, error: catError } = await supabaseClient
+                .from('catalogo_itens')
+                .insert([{ descricao, modelo, fabricante, possui_patrimonio: true }])
+                .select()
+                .single();
+
+            if (catError) {
+                alert('Erro ao cadastrar item no catálogo: ' + catError.message);
+                return;
+            }
+
+            // 2. Criar na tabela de patrimônios
+            const { error: patError } = await supabaseClient
+                .from('patrimonios')
+                .insert([{
+                    item_id: catData.id,
+                    numero_patrimonio: numPatrimonio || null,
+                    serie_tag: serie || null,
+                    local_atual_id: localId,
+                    status: status
+                }]);
+
+            if (patError) {
+                alert('Erro ao cadastrar patrimônio: ' + patError.message);
+                return;
+            }
+
+            alert('Patrimônio cadastrado com sucesso!');
+            location.reload();
+        }
+
+        carregarLocais();
+    </script>
+</body>
+</html>
