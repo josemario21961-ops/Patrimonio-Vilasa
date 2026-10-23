@@ -55,9 +55,9 @@
 
     <!-- Script de Conexão e Lógica -->
     <script>
-        // Substitua pelas suas credenciais do Supabase
-        const SUPABASE_URL = 'SUA_PROJECT_URL';
-        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON';
+        // Credenciais configuradas do Supabase
+        const SUPABASE_URL = 'https://odwctwqdwrtavsamyeam.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kd2N0d3Fkd3J0YXZzYW15ZWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODE1MzQsImV4cCI6MjEwODM1NzUzNH0.JG4-XhewNCOFWkvxGuXwa3LDJx_KLROSmUIy0-O0FLE';
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -76,12 +76,12 @@
                 `);
 
             if (error) {
-                alert('Erro ao carregar dados: ' + error.message);
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Erro ao carregar dados: ${error.message} (Verifique se as tabelas foram criadas no Supabase).</td></tr>`;
                 return;
             }
 
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nenhum patrimônio cadastrado.</td></tr>`;
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nenhum patrimônio cadastrado no banco de dados ainda.</td></tr>`;
                 return;
             }
 
