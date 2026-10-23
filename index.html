@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Patrimônio e Almoxarifado</title>
+    <!-- Tailwind CSS para um design moderno e responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="min-h-screen flex flex-col">
+        <!-- Cabeçalho -->
+        <header class="bg-blue-900 text-white shadow-md">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <h1 class="text-xl font-bold">Gestão de Ativos & Canteiros</h1>
+                <nav class="space-x-4">
+                    <a href="index.html" class="underline font-semibold">Inventário</a>
+                    <a href="romaneio.html" class="hover:underline">Novo Romaneio</a>
+                    <a href="relatorio.html" class="hover:underline">Relatório Semanal (PDF)</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Consulta de Patrimônio e Estoque</h2>
+                <button onclick="carregarDados()" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">Atualizar Dados</button>
+            </div>
+
+            <!-- Tabela de Dados -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patrimônio / TAG</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modelo / Fabricante</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Localização Atual</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-patrimonios" class="divide-y divide-gray-200 text-sm text-gray-700">
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">Carregando dados do Supabase...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script de Conexão e Lógica -->
+    <script>
+        // Substitua pelas suas credenciais do Supabase
+        const SUPABASE_URL = 'SUA_PROJECT_URL';
+        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON';
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function carregarDados() {
+            const tbody = document.getElementById('tabela-patrimonios');
+            tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Buscando informações...</td></tr>`;
+
+            const { data, error } = await supabaseClient
+                .from('patrimonios')
+                .select(`
+                    numero_patrimonio,
+                    serie_tag,
+                    status,
+                    catalogo_itens (descricao, modelo, fabricante),
+                    locais (nome, tipo)
+                `);
+
+            if (error) {
+                alert('Erro ao carregar dados: ' + error.message);
+                return;
+            }
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nenhum patrimônio cadastrado.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-mono font-bold">${item.numero_patrimonio || 'S/N'}</td>
+                    <td class="px-6 py-4">${item.catalogo_itens?.descricao || '-'}</td>
+                    <td class="px-6 py-4">${item.catalogo_itens?.modelo || ''} / ${item.catalogo_itens?.fabricante || ''}</td>
+                    <td class="px-6 py-4 font-semibold text-blue-800">${item.locais?.nome || 'Não definido'} (${item.locais?.tipo || ''})</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 text-xs rounded bg-gray-200">${item.status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Executar ao carregar a página
+        carregarDados();
+    </script>
+</body>
+</html>
