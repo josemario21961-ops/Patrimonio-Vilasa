@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Romaneio - Controle de Patrimônio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-blue-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Gestão de Ativos & Canteiros</h1>
+            <nav class="space-x-4">
+                <a href="index.html" class="hover:underline">Inventário</a>
+                <a href="cadastros.html" class="hover:underline">Cadastros</a>
+                <a href="romaneio.html" class="underline font-semibold">Novo Romaneio</a>
+                <a href="relatorio.html" class="hover:underline">Relatório Semanal (PDF)</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Emitir Romaneio de Transferência</h2>
+
+        <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nº do Romaneio / Termo</label>
+                    <input type="text" id="num_romaneio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: ROM-2026/001">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Selecionar Patrimônio / Ativo</label>
+                    <select id="patrimonio_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                        <option value="">Carregando ativos...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Local de Origem</label>
+                    <select id="local_origem_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                        <option value="">Selecione origem...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Local de Destino (Obra / Alojamento)</label>
+                    <select id="local_destino_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                        <option value="">Selecione destino...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Responsável Envio</label>
+                    <input type="text" id="resp_envio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Seu nome">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Responsável Recebimento</label>
+                    <input type="text" id="resp_recebimento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Quem vai receber">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Motorista / Transportador</label>
+                    <input type="text" id="motorista" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Nome do motorista">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Observações</label>
+                <textarea id="observacoes" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Detalhes do estado do equipamento..."></textarea>
+            </div>
+
+            <button onclick="realizarTransferencia()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-bold">Registrar Transferência e Atualizar Local</button>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://odwctwqdwrtavsamyeam.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kd2N0d3Fkd3J0YXZzYW15ZWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODE1MzQsImV4cCI6MjEwODM1NzUzNH0.JG4-XhewNCOFWkvxGuXwa3LDJx_KLROSmUIy0-O0FLE';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function carregarSelects() {
+            // Carregar Locais
+            const { data: locais } = await supabaseClient.from('locais').select('id, nome, tipo');
+            const selectOrigem = document.getElementById('local_origem_id');
+            const selectDestino = document.getElementById('local_destino_id');
+            selectOrigem.innerHTML = '<option value="">Origem...</option>';
+            selectDestino.innerHTML = '<option value="">Destino...</option>';
+            locais.forEach(l => {
+                selectOrigem.innerHTML += `<option value="${l.id}">${l.nome} (${l.tipo})</option>`;
+                selectDestino.innerHTML += `<option value="${l.id}">${l.nome} (${l.tipo})</option>`;
+            });
+
+            // Carregar Patrimônios com dados do catálogo
+            const { data: pats } = await supabaseClient.from('patrimonios').select('id, numero_patrimonio, catalogo_itens(descricao)');
+            const selectPat = document.getElementById('patrimonio_id');
+            selectPat.innerHTML = '<option value="">Selecione o ativo...</option>';
+            pats.forEach(p => {
+                selectPat.innerHTML += `<option value="${p.id}">Patrimônio: ${p.numero_patrimonio || 'S/N'} - ${p.catalogo_itens?.descricao || ''}</option>`;
+            });
+        }
+
+        async function realizarTransferencia() {
+            const numRomaneio = document.getElementById('num_romaneio').value;
+            const patrimonioId = document.getElementById('patrimonio_id').value;
+            const localOrigemId = document.getElementById('local_origem_id').value;
+            const localDestinoId = document.getElementById('local_destino_id').value;
+            const respEnvio = document.getElementById('resp_envio').value;
+            const respRecebimento = document.getElementById('resp_recebimento').value;
+            const motorista = document.getElementById('motorista').value;
+            const observacoes = document.getElementById('observacoes').value;
+
+            if (!numRomaneio || !patrimonioId || !localOrigemId || !localDestinoId) {
+                alert('Preencha os campos obrigatórios (Romaneio, Patrimônio, Origem e Destino).');
+                return;
+            }
+
+            // 1. Criar o Romaneio
+            const { data: romData, error: romError } = await supabaseClient
+                .from('romaneios')
+                .insert([{
+                    numero_romaneio: numRomaneio,
+                    local_origem_id: localOrigemId,
+                    local_destino_id: localDestinoId,
+                    responsavel_envio: respEnvio,
+                    responsavel_recebimento: respRecebimento,
+                    motorista_transportador: motorista,
+                    observacoes: observacoes
+                }])
+                .select()
+                .single();
+
+            if (romError) {
+                alert('Erro ao registrar romaneio: ' + romError.message);
+                return;
+            }
+
+            // 2. Atualizar a localização atual do patrimônio imediatamente
+            const { error: patError } = await supabaseClient
+                .from('patrimonios')
+                .update({ local_atual_id: localDestinoId, status: 'EM_USO' })
+                .eq('id', patrimonioId);
+
+            if (patError) {
+                alert('Erro ao atualizar localização do patrimônio: ' + patError.message);
+                return;
+            }
+
+            alert('Transferência realizada com sucesso! Localização atualizada.');
+            window.location.href = 'index.html';
+        }
+
+        carregarSelects();
+    </script>
+</body>
+</html>
