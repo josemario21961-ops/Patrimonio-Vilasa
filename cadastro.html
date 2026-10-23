@@ -20,56 +20,82 @@
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto px-4 py-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Cadastrar Novo Patrimônio / Item</h2>
-
-        <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Descrição do Item</label>
-                <input type="text" id="descricao" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: Ar Condicionado 9000 BTUS / MESA DE ESCRITÓRIO">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
+    <main class="max-w-4xl mx-auto px-4 py-6 space-y-8">
+        
+        <!-- Bloco 1: Cadastrar Patrimônio / Item -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Cadastrar Novo Patrimônio / Item</h2>
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Modelo</label>
-                    <input type="text" id="modelo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: Split Inverter">
+                    <label class="block text-sm font-medium text-gray-700">Descrição do Item</label>
+                    <input type="text" id="descricao" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: Ar Condicionado 9000 BTUS / MESA DE ESCRITÓRIO">
                 </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Modelo</label>
+                        <input type="text" id="modelo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: Split Inverter">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Fabricante</label>
+                        <input type="text" id="fabricante" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: Consul / LG">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Número de Patrimônio / TAG (Se houver)</label>
+                        <input type="text" id="patrimonio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: 11148">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Número de Série / Tag Adicional</label>
+                        <input type="text" id="serie" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: MA0141646">
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Fabricante</label>
-                    <input type="text" id="fabricante" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: Consul / LG">
+                    <label class="block text-sm font-medium text-gray-700">Localização Inicial</label>
+                    <select id="local_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                        <option value="">Carregando locais...</option>
+                    </select>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Número de Patrimônio / TAG (Se houver)</label>
-                    <input type="text" id="patrimonio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: 11148">
+                    <label class="block text-sm font-medium text-gray-700">Status Inicial</label>
+                    <select id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                        <option value="DISPONIVEL">Disponível</option>
+                        <option value="EM_USO">Em Uso</option>
+                        <option value="MANUTENCAO">Em Manutenção</option>
+                        <option value="CALIBRACAO">Em Calibração</option>
+                    </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Número de Série / Tag Adicional</label>
-                    <input type="text" id="serie" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: MA0141646">
-                </div>
-            </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Localização Inicial</label>
-                <select id="local_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
-                    <option value="">Carregando locais...</option>
-                </select>
+                <button onclick="salvarItem()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-bold">Salvar Patrimônio</button>
             </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Status Inicial</label>
-                <select id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
-                    <option value="DISPONIVEL">Disponível</option>
-                    <option value="EM_USO">Em Uso</option>
-                    <option value="MANUTENCAO">Em Manutenção</option>
-                    <option value="CALIBRACAO">Em Calibração</option>
-                </select>
-            </div>
-
-            <button onclick="salvarItem()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-bold">Salvar Patrimônio</button>
         </div>
+
+        <!-- Bloco 2: Cadastrar Nova Localidade -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Cadastrar Nova Localidade (Obra / Alojamento / Central)</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nome da Localidade</label>
+                    <input type="text" id="nome_local" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Ex: Nova Obra São Paulo / Alojamento B">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tipo de Local</label>
+                    <select id="tipo_local" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                        <option value="OBRA">Obra</option>
+                        <option value="ALOJAMENTO">Alojamento</option>
+                        <option value="CENTRAL">Central</option>
+                    </select>
+                </div>
+
+                <button onclick="salvarLocalidade()" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 font-bold">Salvar Nova Localidade</button>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -79,7 +105,7 @@
 
         async function carregarLocais() {
             const select = document.getElementById('local_id');
-            const { data, error } = await supabaseClient.from('locais').select('id, nome, tipo');
+            const { data, error } = await supabaseClient.from('locais').select('id, nome, tipo').order('nome');
             if (error) {
                 alert('Erro ao carregar locais: ' + error.message);
                 return;
@@ -104,7 +130,6 @@
                 return;
             }
 
-            // 1. Criar no catálogo
             const { data: catData, error: catError } = await supabaseClient
                 .from('catalogo_itens')
                 .insert([{ descricao, modelo, fabricante, possui_patrimonio: true }])
@@ -116,7 +141,6 @@
                 return;
             }
 
-            // 2. Criar na tabela de patrimônios
             const { error: patError } = await supabaseClient
                 .from('patrimonios')
                 .insert([{
@@ -133,6 +157,28 @@
             }
 
             alert('Patrimônio cadastrado com sucesso!');
+            location.reload();
+        }
+
+        async function salvarLocalidade() {
+            const nome = document.getElementById('nome_local').value;
+            const tipo = document.getElementById('tipo_local').value;
+
+            if (!nome) {
+                alert('Digite o nome da localidade.');
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('locais')
+                .insert([{ nome, tipo }]);
+
+            if (error) {
+                alert('Erro ao cadastrar localidade: ' + error.message);
+                return;
+            }
+
+            alert('Localidade cadastrada com sucesso!');
             location.reload();
         }
 
